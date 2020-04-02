@@ -1,8 +1,10 @@
 load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 
-config_setting(
-    name = "windows",
-    values = {"cpu": "x64_windows"},
+copy_file(
+    name = "runner_dart",
+    src = "runner.dart",
+    out = "_runner.dart",
 )
 
 cc_binary(
@@ -14,10 +16,10 @@ cc_binary(
 native_binary(
     name = "demo",
     src = select({
-        ":windows": "runner.cmd",
+        "@bazel_tools//src/conditions:host_windows": "runner.cmd",
         "//conditions:default": "runner.sh",
     }),
-    out = "runner",
-    args = ["runner.dart", "$(location :native.dll)"],
-    data = ["runner.dart", ":native.dll"],
+    out = "runner.cmd",
+    args = ["$(location :runner_dart)", "$(location :native.dll)"],
+    data = [":runner_dart", ":native.dll"],
 )
