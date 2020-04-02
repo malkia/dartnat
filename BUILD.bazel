@@ -2,34 +2,34 @@ load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 
-copy_file(
-    name = "demo_dart",
-    src = "demo.dart",
-    out = "demo_out.dart",
-)
-
-write_file(
-    name = "runner_cmd",
-    out = "runner.cmd",
-    content = select({
-        "@bazel_tools//src/conditions:host_windows":
-            ["pushd %~dp0 && dart %*"],
-        "//conditions:default":
-            ["ls -l; dart $*"]
-    }),  
-    is_executable = True
-)
-
 cc_binary(
     name = "native.dll",
     srcs = ["core.cpp"],
     linkshared = True,
 )
 
+copy_file(
+    name = "standalone_demo_dart",
+    out = "standalone_demo.dart",
+    src = "demo.dart",
+)
+
+write_file(
+    name = "standalone_runner",
+    out = "standalone_runner.cmd",
+    is_executable = True,
+    content = select({
+        "@bazel_tools//src/conditions:host_windows":
+            ["pushd %~dp0 && dart %*"],
+        "//conditions:default":
+            ["dart $*"]
+    }),
+)
+
 native_binary(
-    name = "demo",
-    src = ":runner_cmd",
-    out = "runner.cmd",
-    args = ["$(location :demo_dart)", "$(location :native.dll)"],
-    data = [":demo_dart", ":native.dll"],
+    name = "standalone_demo",
+    src = ":standalone_runner",
+    out = "standalone_runner.cmd",
+    args = ["$(location :standalone_demo_dart)", "$(location :native.dll)"],
+    data = [":standalone_demo_dart", ":native.dll"],
 )
