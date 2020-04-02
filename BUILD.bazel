@@ -1,10 +1,23 @@
 load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
 
 copy_file(
     name = "demo_dart",
     src = "demo.dart",
     out = "demo_out.dart",
+)
+
+write_file(
+    name = "runner_cmd",
+    out = "runner.cmd",
+    content = select({
+        "@bazel_tools//src/conditions:host_windows":
+            ["pushd %~dp0 && dart %*"],
+        "//conditions:default":
+            ["ls -l; dart $*"]
+    }),  
+    is_executable = True
 )
 
 cc_binary(
@@ -15,10 +28,7 @@ cc_binary(
 
 native_binary(
     name = "demo",
-    src = select({
-        "@bazel_tools//src/conditions:host_windows": "runner.cmd",
-        "//conditions:default": "runner.sh",
-    }),
+    src = ":runner_cmd",
     out = "runner.cmd",
     args = ["$(location :demo_dart)", "$(location :native.dll)"],
     data = [":demo_dart", ":native.dll"],
