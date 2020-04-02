@@ -1,6 +1,3 @@
-echo BALLLS!
-dir
-dir __main__
+@echo off
 pushd %~dp0
-dir *.dart /s/b
 dart %*
