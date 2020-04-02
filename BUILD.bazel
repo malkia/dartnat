@@ -1,0 +1,23 @@
+load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
+
+config_setting(
+    name = "windows",
+    values = {"cpu": "x64_windows"},
+)
+
+cc_binary(
+    name = "native.dll",
+    srcs = ["core.cpp"],
+    linkshared = True,
+)
+
+native_binary(
+    name = "demo",
+    src = select({
+        ":windows": "runner.cmd",
+        "//conditions:default": "runner.sh",
+    }),
+    out = "runner",
+    args = ["runner.dart", "$(location :native.dll)"],
+    data = ["runner.dart", ":native.dll"],
+)
