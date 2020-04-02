@@ -31,8 +31,9 @@ write_file(
     out = "_standalone_runner.cmd",
     is_executable = True,
     content = select({
+        ## Kludge - I don't think native_binary rules are working correctly for Windows
         "@bazel_tools//src/conditions:host_windows":
-            ["pushd %~dp0 && dart %*"],
+            ["pushd %~dp0 && cd .. && dart %*"],
         "//conditions:default":
             ["dart $*"]
     }),
@@ -42,6 +43,6 @@ native_binary(
     name = "standalone_demo",
     src = ":standalone_runner",
     out = "standalone_runner.cmd",
-    args = ["$(location :standalone_demo_dart)", "$(location :native.dll)"],
+    args = ["$(location :standalone_demo_dart)", "$(location :native.dll)", "$(execpath :native.dll)", "$(rootpath :native.dll)"],
     data = [":standalone_demo_dart", ":native.dll"],
 )
