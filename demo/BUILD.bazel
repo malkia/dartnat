@@ -1,22 +1,34 @@
+load("@io_bazel_rules_dart//dart/build_rules:core.bzl", "dart_library")
+load("@io_bazel_rules_dart//dart/build_rules:vm.bzl", "dart_vm_binary")
+
 load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 
 cc_binary(
-    name = "native.dll",
-    srcs = ["core.cpp"],
-    linkshared = True,
+     name = "native.dll",
+     srcs = ["core.cpp"],
+     linkshared = True,
+)
+
+dart_vm_binary(
+    name = "demo",
+    srcs = ["demo.dart"],
+    script_file = "demo.dart",
+#    snapshot = True,
+    args = ["$(location :native.dll)"],
+    data = [":native.dll"]
 )
 
 copy_file(
     name = "standalone_demo_dart",
-    out = "standalone_demo.dart",
+    out = "_standalone_demo.dart",
     src = "demo.dart",
 )
 
 write_file(
     name = "standalone_runner",
-    out = "standalone_runner.cmd",
+    out = "_standalone_runner.cmd",
     is_executable = True,
     content = select({
         "@bazel_tools//src/conditions:host_windows":

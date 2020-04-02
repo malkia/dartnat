@@ -1,5 +1,8 @@
+workspace(name="dartnat")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+
 http_archive(
     name = "bazel_skylib",
     urls = [
@@ -10,3 +13,12 @@ http_archive(
 )
 load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 bazel_skylib_workspace()
+
+git_repository(
+    name = "io_bazel_rules_dart",
+    remote = "https://github.com/cbracken/rules_dart.git",
+    tag = "2.7.2",
+)
+
+load("@io_bazel_rules_dart//dart/build_rules:repositories.bzl", "dart_repositories")
+dart_repositories()
